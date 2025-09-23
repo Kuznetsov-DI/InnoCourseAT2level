@@ -1,18 +1,20 @@
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.stream.Stream;
 
 public class StudentTest {
 
     private Student student;
     private String name;
-    private List<Integer> grades = new ArrayList<>();
+    private List<Integer> grades;
 
     @BeforeEach
     void setUp() {
@@ -26,7 +28,7 @@ public class StudentTest {
     void nameGetterIsCorrect() {
         String currentName = student.getName();
 
-        assertEquals(name, currentName);
+        Assertions.assertEquals(name, currentName);
     }
 
     @Test
@@ -36,8 +38,8 @@ public class StudentTest {
 
         student.setName(newName);
 
-        assertEquals(newName, student.getName());
-        assertNotEquals(name, student.getName());
+        Assertions.assertEquals(newName, student.getName());
+        Assertions.assertNotEquals(name, student.getName());
     }
 
     @Test
@@ -52,35 +54,26 @@ public class StudentTest {
 
         List<Integer> currentGrades = student.getGrades();
 
-        assertEquals(grades, currentGrades);
+        Assertions.assertEquals(grades, currentGrades);
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("validGradeArguments")
     @DisplayName("Метод добавление оценки, при валидном значении")
-    void setGradeWithValidArgument() {
-        student.addGrade(2);
-        student.addGrade(5);
+    void setGradeWithValidArgument(Integer grade) {
+        student.addGrade(grade);
 
-        assertTrue(student.getGrades().contains(2));
-        assertTrue(student.getGrades().contains(5));
+        Assertions.assertTrue(student.getGrades().contains(grade));
     }
 
-    @Test
-    @DisplayName("Метод добавление оценки, при значении меньше допустимого")
-    void setGradeWithLessArgument() {
-        var thrown = assertThrows(IllegalArgumentException.class, () ->
-                student.addGrade(1));
+    @ParameterizedTest
+    @MethodSource("notValidGradeArguments")
+    @DisplayName("Метод добавление оценки, при значении не допустимом")
+    void setGradeWithNotValidArgument(Integer grade) {
+        var thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
+                student.addGrade(grade));
 
-        assertEquals("1 is wrong grade", thrown.getMessage());
-    }
-
-    @Test
-    @DisplayName("Метод добавление оценки, при значении больше допустимого")
-    void setGradeWithMoreArgument() {
-        var thrown = assertThrows(IllegalArgumentException.class, () ->
-                student.addGrade(6));
-
-        assertEquals("6 is wrong grade", thrown.getMessage());
+        Assertions.assertEquals(String.format("%s is wrong grade", grade), thrown.getMessage());
     }
 
     @Test
@@ -98,7 +91,7 @@ public class StudentTest {
 
         List<Integer> currentGradesAfterAdd = student.getGrades();
 
-        assertEquals(grades, currentGradesAfterAdd);
+        Assertions.assertEquals(grades, currentGradesAfterAdd);
     }
 
     @Test
@@ -116,7 +109,7 @@ public class StudentTest {
             secondStudent.addGrade(grade);
         }
 
-        assertEquals(student, secondStudent);
+        Assertions.assertEquals(student, secondStudent);
     }
 
     @Test
@@ -136,6 +129,14 @@ public class StudentTest {
         int actualHash = student.hashCode();
 
 
-        assertEquals(expectedHash, actualHash);
+        Assertions.assertEquals(expectedHash, actualHash);
+    }
+
+    static Stream<Integer> validGradeArguments() {
+        return Stream.of(2, 5);
+    }
+
+    static Stream<Integer> notValidGradeArguments() {
+        return Stream.of(1, 6);
     }
 }
