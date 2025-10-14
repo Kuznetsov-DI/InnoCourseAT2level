@@ -56,5 +56,6 @@ public class GetStudentByIdTest extends BaseTest {
     void getStudentIfNotExist() {
         var response = studentClient.getStudent(-1);
         Assertions.assertEquals(404, response.statusCode());
+        Assertions.assertTrue(response.body().asString().isEmpty());
     }
 }
